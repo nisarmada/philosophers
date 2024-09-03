@@ -6,7 +6,7 @@
 /*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/06 14:25:43 by nsarmada      #+#    #+#                 */
-/*   Updated: 2024/09/03 17:13:58 by nikos         ########   odam.nl         */
+/*   Updated: 2024/09/03 18:31:02 by nikos         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ void init_stuff(data_t *data, int *array, int ac)
 	data->start_time = timestamp();
 	data->someone_died = 0;
 	data->num_meals = 0;
+	data->philos_created = 0;
 	if (ac == 6)
 		data->num_meals = array[4];
 	data->philo = malloc(data->num_philo * sizeof(philo_t));
@@ -87,14 +88,9 @@ void *philo_routine(void *arg)
 	philo_t *philo;
 
 	philo = (philo_t *) arg;
-	if (philo->data->num_philo % 2 == 0)
-	{	if (philo->id % 2 != 0)
-			usleep(philo->data->time_to_eat / 2);}
-	else
-	{
-		if (philo->id % 2 == 0)
-			usleep(philo->data->time_to_eat / 2);
-	}
+	pre_philo_routine(philo);
+	// if (philo->id % 2 != 0)
+	// 	usleep(philo->data->time_to_eat / 2);
 	while (1)
 	{
 		printf("%lld %i is thinking\n",  time_diff(philo->data->start_time, timestamp()), philo->id);
@@ -123,6 +119,7 @@ void *monitor_routine(void *arg)
 	int		i;
 
 	data = (data_t *) arg;
+	data->philos_created = 1;
 	while (1)
 	{
 		i = 0;

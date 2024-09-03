@@ -6,7 +6,7 @@
 /*   By: nikos <nikos@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/28 09:42:38 by nikos         #+#    #+#                 */
-/*   Updated: 2024/08/31 13:58:56 by nikos         ########   odam.nl         */
+/*   Updated: 2024/09/03 18:21:05 by nikos         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,9 @@ void init_mutex(data_t *data)
 {
     if (pthread_mutex_init(&data->num_meals_mutex, NULL) != 0)
         exit_error("failed to create num_meals mutex");
+    if (pthread_mutex_init(&data->start_mutex, NULL) != 0)
+			exit_error("start mutex initialization failed");
+    
 }
 
 int everyone_ate(data_t *data)

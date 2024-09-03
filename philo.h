@@ -6,7 +6,7 @@
 /*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/06 14:25:36 by nsarmada      #+#    #+#                 */
-/*   Updated: 2024/08/31 13:45:38 by nikos         ########   odam.nl         */
+/*   Updated: 2024/09/03 18:20:04 by nikos         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,8 @@ typedef struct data_s{
 	pthread_mutex_t	death_lock;
 	pthread_mutex_t	num_meals_mutex;
 	pthread_t		monitor_thread;
+	int				philos_created;
+	pthread_mutex_t	start_mutex;
 } data_t;
 
 typedef struct philo_s{
@@ -66,5 +68,5 @@ void		ft_usleep(long long millisecs);
 int			everyone_ate(data_t *data);
 void		init_mutex(data_t *data);
 void		cleanup_crew(data_t *data, int *array);
-
+void pre_philo_routine(philo_t *philo);
 #endif
