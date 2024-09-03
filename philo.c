@@ -6,7 +6,7 @@
 /*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/06 14:25:43 by nsarmada      #+#    #+#                 */
-/*   Updated: 2024/08/31 13:24:10 by nikos         ########   odam.nl         */
+/*   Updated: 2024/09/03 17:13:58 by nikos         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,8 +87,14 @@ void *philo_routine(void *arg)
 	philo_t *philo;
 
 	philo = (philo_t *) arg;
-	if (philo->id % 2 == 0)
-        usleep(philo->data->time_to_eat / 2);
+	if (philo->data->num_philo % 2 == 0)
+	{	if (philo->id % 2 != 0)
+			usleep(philo->data->time_to_eat / 2);}
+	else
+	{
+		if (philo->id % 2 == 0)
+			usleep(philo->data->time_to_eat / 2);
+	}
 	while (1)
 	{
 		printf("%lld %i is thinking\n",  time_diff(philo->data->start_time, timestamp()), philo->id);
@@ -101,11 +107,11 @@ void *philo_routine(void *arg)
 		philo->last_meal = timestamp();
 		philo->meals_eaten++;
 		pthread_mutex_unlock(&philo->last_meal_mutex);
-		usleep(philo->data->time_to_eat * 1000);
+		ft_usleep(philo->data->time_to_eat);
 		pthread_mutex_unlock(philo->left);
 		pthread_mutex_unlock(philo->right);
 		printf("%lld %i is sleeping\n", time_diff(philo->data->start_time, timestamp()), philo->id);
-		usleep(philo->data->time_to_sleep * 1000);
+		ft_usleep(philo->data->time_to_sleep);
 		if (philo->data->num_meals && everyone_ate(philo->data))
 			exit(EXIT_SUCCESS);
 	}
@@ -135,7 +141,7 @@ void *monitor_routine(void *arg)
 			pthread_mutex_unlock(&data->philo[i].last_meal_mutex);
 			i++;
 		}
-		usleep(100);
+		usleep(1000);
 	}
 	return (NULL);
 }
