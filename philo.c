@@ -6,13 +6,13 @@
 /*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/06 14:25:43 by nsarmada      #+#    #+#                 */
-/*   Updated: 2024/09/04 14:56:05 by nikos         ########   odam.nl         */
+/*   Updated: 2024/09/06 15:32:41 by nsarmada      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	init_stuff(t_data *data, int *array, int ac)
+int	init_stuff(t_data *data, int *array, int ac)
 {
 	data->num_philo = array[0];
 	data->time_to_die = array[1];
@@ -20,6 +20,8 @@ void	init_stuff(t_data *data, int *array, int ac)
 	data->time_to_sleep = array[3];
 	data->num_meals = 0;
 	data->start_time = timestamp();
+	if (data->start_time == -1)
+		return (-1);
 	data->someone_died = 0;
 	data->num_meals = 0;
 	data->philos_created = 0;
@@ -27,19 +29,19 @@ void	init_stuff(t_data *data, int *array, int ac)
 		data->num_meals = array[4];
 	data->philo = malloc(data->num_philo * sizeof(t_philo));
 	if (!data->philo)
-		exit_error("philo malloc failed");
+		return (exit_error("philo malloc failed", 3));
 	data->forks = malloc(data->num_philo * sizeof(pthread_mutex_t));
 	if (!data->forks)
-		exit_error("fork malloc failed");
+		return (exit_error("fork malloc failed", 3));
+	init_mutex(data);
+	return (0);
 }
 
-void	init_philos(t_data *data)
+int	init_philos(t_data *data)
 {
 	int	i;
 
 	i = 0;
-	if (pthread_mutex_init(&data->death_lock, NULL) != 0)
-		exit_error("death mutex failed");
 	while (i < data->num_philo)
 	{
 		data->philo[i].id = i + 1;
@@ -47,9 +49,9 @@ void	init_philos(t_data *data)
 		data->philo[i].meals_eaten = 0;
 		data->philo[i].last_meal = data->start_time;
 		if (pthread_mutex_init(&data->forks[i], NULL) != 0)
-			exit_error("fork initialization failed");
+			return (exit_error("fork initialization failed", 2));
 		if (pthread_mutex_init(&data->philo[i].last_meal_mutex, NULL) != 0)
-			exit_error("failed to initialize last meal mutex");
+			return (exit_error("failed to initialize last meal mutex", 2));
 		i++;
 	}
 	i = 0;
@@ -60,86 +62,86 @@ void	init_philos(t_data *data)
 		data->philo[i].last_meal = data->start_time;
 		i++;
 	}
+	return (0);
 }
+
 void	*philo_routine(void *arg)
 {
-	t_philo *philo;
+	t_philo	*philo;
 
 	philo = (t_philo *) arg;
-	// if (philo->id % 2 != 0)
-	// 	ft_usleep(philo->data->time_to_eat / 2);
-	while (1)
+	while (!check_death(philo->data))
 	{
-		printf("%lld %i is thinking\n",  time_diff(philo->data->start_time, timestamp()), philo->id);
-		pthread_mutex_lock(philo->left);
-		printf("%lld %i picked left fork\n",  time_diff(philo->data->start_time, timestamp()), philo->id);
-		pthread_mutex_lock(philo->right);
-		printf("%lld %i picked right fork\n",  time_diff(philo->data->start_time, timestamp()), philo->id);
-		printf("%lld %i is eating\n",  time_diff(philo->data->start_time, timestamp()), philo->id);
-		pthread_mutex_lock(&philo->last_meal_mutex);
-		philo->last_meal = timestamp();
-		philo->meals_eaten++;
-		pthread_mutex_unlock(&philo->last_meal_mutex);
-		ft_usleep(philo->data->time_to_eat);
-		pthread_mutex_unlock(philo->left);
-		pthread_mutex_unlock(philo->right);
-		printf("%lld %i is sleeping\n", time_diff(philo->data->start_time, timestamp()), philo->id);
+		printf("%lld %i is thinking\n",
+			time_diff(philo->data->start_time, timestamp()), philo->id);
+		if (check_death(philo->data))
+			return (NULL);
+		if (philo->id % 2 == 0)
+			even_philo(philo);
+		else
+			odd_philo(philo);
+		if (check_death(philo->data))
+			return (NULL);
+		printf("%lld %i is sleeping\n",
+			time_diff(philo->data->start_time, timestamp()), philo->id);
 		ft_usleep(philo->data->time_to_sleep);
 		if (philo->data->num_meals && everyone_ate(philo->data))
-			exit(EXIT_SUCCESS);
+			return (NULL);
 	}
 	return (NULL);
 }
+
 void	*monitor_routine(void *arg)
 {
 	t_data	*data;
 	int		i;
 
 	data = (t_data *) arg;
-	while (1)
+	while (!data->someone_died)
 	{
 		i = 0;
-		while (i < data->num_philo)
+		while (i < data->num_philo && !data->someone_died)
 		{
+			if ((data->num_meals && everyone_ate(data)) || data->someone_died)
+				return (NULL);
 			pthread_mutex_lock(&data->philo[i].last_meal_mutex);
-			if ((timestamp() - data->philo[i].last_meal > (long long)data->time_to_die))
-			{ 
-				pthread_mutex_lock(&data->death_lock);
-				printf("%lld %i died\n", time_diff(data->start_time, timestamp()), data->philo[i].id);
-				data->someone_died  = 1;
-				pthread_mutex_unlock(&data->death_lock);
+			if ((timestamp() - data->philo[i].last_meal
+					> (long long)data->time_to_die))
+			{
 				pthread_mutex_unlock(&data->philo[i].last_meal_mutex);
-				exit(EXIT_SUCCESS);
+				handle_death(data, i);
+				return (NULL);
 			}
 			pthread_mutex_unlock(&data->philo[i].last_meal_mutex);
 			i++;
 		}
-		usleep(1000);
+		usleep(100);
 	}
 	return (NULL);
 }
 
-void	create_threads(t_data *data)
+int	create_threads(t_data *data)
 {
 	int	i;
 
 	i = 0;
 	if (pthread_create(&data->monitor_thread, NULL, monitor_routine, data) != 0)
-		exit_error("failed at creating monitor thread");
+		return (exit_error("failed at creating monitor thread", 1));
 	while (i < data->num_philo)
 	{
-		if (pthread_create(&data->philo[i].thread_id, NULL,
-				philo_routine, &data->philo[i]) != 0)
-			exit_error("failed to create philo thread");
+		if (pthread_create(&data->philo[i].thread_id,
+				NULL, philo_routine, &data->philo[i]) != 0)
+			return (exit_error("failed to create philo thread", 1));
 		i++;
 	}
 	i = 0;
 	while (i < data->num_philo)
 	{
 		if (pthread_join(data->philo[i].thread_id, NULL) != 0)
-			exit_error("failed to join thread");
+			return (exit_error("failed to join thread", 1));
 		i++;
 	}
 	if (pthread_join(data->monitor_thread, NULL) != 0)
-		exit_error("failed to join monitor thread");
+		return (exit_error("failed to join monitor thread", 1));
+	return (0);
 }

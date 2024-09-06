@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        ::::::::            */
+/*   philo_utils.c                                      :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/09/06 15:00:25 by nsarmada      #+#    #+#                 */
+/*   Updated: 2024/09/06 15:04:41 by nsarmada      ########   odam.nl         */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 int	ft_atoi(const char *nptr)
@@ -29,46 +41,36 @@ int	ft_atoi(const char *nptr)
 	return (sum * sign);
 }
 
-int *turn_to_int(char **av)
+int	*turn_to_int(char **av)
 {
-    int i;
-    int *array;
-    int num_args;
+	int	i;
+	int	*array;
+	int	num_args;
 
-    i = 1;
-    while (av[i])
-        i++;
-    num_args = i - 1;
-    array = malloc((num_args) * sizeof(int));
-    if (!array)
-        return (NULL);
-    i = 0;
-    while (i < num_args)
-    {
-        array[i] = ft_atoi(av[i + 1]);
-        i++;
-    }
-    return (array);
-}
-void print_array(int *array)
-{
-    int i = 0;
-
-    while (array[i])
-    {
-        printf("array[%i] = %i\n", i, array[i]);
-        i++;
-    }
+	i = 1;
+	while (av[i])
+		i++;
+	num_args = i - 1;
+	array = malloc((num_args) * sizeof(int));
+	if (!array)
+		return (NULL);
+	i = 0;
+	while (i < num_args)
+	{
+		array[i] = ft_atoi(av[i + 1]);
+		i++;
+	}
+	return (array);
 }
 
-int is_digit(char c)
+int	is_digit(char c)
 {
 	return (c >= '0' && c <= '9');
 }
 
-int input_check(char *av)
+int	input_check(char *av)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	if (av[i] == '\0')

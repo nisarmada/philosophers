@@ -3,10 +3,10 @@
 /*                                                        ::::::::            */
 /*   main.c                                             :+:    :+:            */
 /*                                                     +:+                    */
-/*   By: nikos <nikos@student.codam.nl>               +#+                     */
+/*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2024/09/04 14:35:17 by nikos         #+#    #+#                 */
-/*   Updated: 2024/09/04 14:52:11 by nikos         ########   odam.nl         */
+/*   Created: 2024/09/06 15:07:26 by nsarmada      #+#    #+#                 */
+/*   Updated: 2024/09/06 15:21:46 by nsarmada      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int	main(int ac, char **av)
 	int		*arg_array;
 	t_data	data;
 
-	i = 1;	
+	i = 1;
 	if (ac != 5 && ac != 6)
 		return (1);
 	while (av[i])

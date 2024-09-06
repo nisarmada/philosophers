@@ -6,67 +6,69 @@
 /*   By: nikos <nikos@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/31 13:24:50 by nikos         #+#    #+#                 */
-/*   Updated: 2024/09/04 15:03:08 by nikos         ########   odam.nl         */
+/*   Updated: 2024/09/06 15:20:01 by nsarmada      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void    cleanup_crew(t_data *data, int *array)
+void	cleanup_crew(t_data *data, int *array)
 {
-    int i;
+	int	i;
 
-    i = 0;
-    free(array);
-    while (i < data->num_philo)
-    {
-        pthread_mutex_destroy(&data->forks[i]);
-        pthread_mutex_destroy(&data->philo[i].last_meal_mutex);
-        i++;
-    }
-    pthread_mutex_destroy(&data->death_lock);
-    pthread_mutex_destroy(&data->num_meals_mutex);
-    free(data->forks);
-    free(data->philo);
+	i = 0;
+	free(array);
+	while (i < data->num_philo)
+	{
+		pthread_mutex_destroy(&data->forks[i]);
+		pthread_mutex_destroy(&data->philo[i].last_meal_mutex);
+		i++;
+	}
+	pthread_mutex_destroy(&data->death_lock);
+	free(data->forks);
+	free(data->philo);
 }
 
-void pre_philo_routine(t_philo *philo)
+int	everyone_ate(t_data *data)
 {
-    while (1)
-    {
-        pthread_mutex_lock(&philo->data->start_mutex);
-        if (philo->data->philos_created)
-        {
-            pthread_mutex_unlock(&philo->data->start_mutex);
-            break;
-        }
-        pthread_mutex_unlock(&philo->data->start_mutex);
-        usleep(100);
-    }
+	int	all_fed;
+	int	i;
+
+	i = 0;
+	all_fed = 1;
+	while (i < data->num_philo)
+	{
+		pthread_mutex_lock(&data->philo[i].last_meal_mutex);
+		if (data->num_meals && data->philo[i].meals_eaten < data->num_meals)
+		{
+			all_fed = 0;
+		}
+		pthread_mutex_unlock(&data->philo[i].last_meal_mutex);
+		i++;
+	}
+	return (all_fed);
 }
 
-int everyone_ate(t_data *data)
+void	handle_death(t_data *data, int i)
 {
-   int   all_fed;
-    int   i;
+	pthread_mutex_lock(&data->death_lock);
+	if (!data->someone_died)
+	{
+		printf("%lld %i died\n",
+			time_diff(data->start_time, timestamp()), data->philo[i].id);
+		data->someone_died = 1;
+	}
+	pthread_mutex_unlock(&data->death_lock);
+}
 
-    i = 0;
-    all_fed = 1;
-    while (i < data->num_philo)
-    {
-        pthread_mutex_lock(&data->philo[i].last_meal_mutex);
-        if (data->num_meals && data->philo[i].meals_eaten < data->num_meals)
-        {
-            all_fed = 0;
-        }
-        pthread_mutex_unlock(&data->philo[i].last_meal_mutex);
-        i++;
-    }
-    if (all_fed)
-    {
-        pthread_mutex_lock(&data->num_meals_mutex);
-        printf("each philo ate %i meals\n", data->num_meals);
-        pthread_mutex_unlock(&data->num_meals_mutex);
-    }
-    return (all_fed);
+int	check_death(t_data *data)
+{
+	int	flag;
+
+	flag = 0;
+	pthread_mutex_lock(&data->death_lock);
+	if (data->someone_died)
+		flag = 1;
+	pthread_mutex_unlock(&data->death_lock);
+	return (flag);
 }
