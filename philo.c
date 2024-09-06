@@ -6,35 +6,13 @@
 /*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/06 14:25:43 by nsarmada      #+#    #+#                 */
-/*   Updated: 2024/09/03 18:31:02 by nikos         ########   odam.nl         */
+/*   Updated: 2024/09/04 14:56:05 by nikos         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-int main (int ac, char **av)
-{
-	int		i;
-	int		*arg_array;
-	data_t	data;
-
-	i = 1;	
-	if (ac != 5 && ac != 6)
-		return (1);
-	while (av[i])
-	{
-		if (!input_check(av[i]))
-			return (0);
-		i++;
-	}
-	arg_array = turn_to_int(av);
-	init_stuff(&data, arg_array, ac);
-	init_philos(&data);
-	create_threads(&data);
-	cleanup_crew(&data, arg_array);
-}
-
-void init_stuff(data_t *data, int *array, int ac)
+void	init_stuff(t_data *data, int *array, int ac)
 {
 	data->num_philo = array[0];
 	data->time_to_die = array[1];
@@ -47,7 +25,7 @@ void init_stuff(data_t *data, int *array, int ac)
 	data->philos_created = 0;
 	if (ac == 6)
 		data->num_meals = array[4];
-	data->philo = malloc(data->num_philo * sizeof(philo_t));
+	data->philo = malloc(data->num_philo * sizeof(t_philo));
 	if (!data->philo)
 		exit_error("philo malloc failed");
 	data->forks = malloc(data->num_philo * sizeof(pthread_mutex_t));
@@ -55,9 +33,9 @@ void init_stuff(data_t *data, int *array, int ac)
 		exit_error("fork malloc failed");
 }
 
-void init_philos(data_t *data)
+void	init_philos(t_data *data)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	if (pthread_mutex_init(&data->death_lock, NULL) != 0)
@@ -83,14 +61,13 @@ void init_philos(data_t *data)
 		i++;
 	}
 }
-void *philo_routine(void *arg)
+void	*philo_routine(void *arg)
 {
-	philo_t *philo;
+	t_philo *philo;
 
-	philo = (philo_t *) arg;
-	pre_philo_routine(philo);
+	philo = (t_philo *) arg;
 	// if (philo->id % 2 != 0)
-	// 	usleep(philo->data->time_to_eat / 2);
+	// 	ft_usleep(philo->data->time_to_eat / 2);
 	while (1)
 	{
 		printf("%lld %i is thinking\n",  time_diff(philo->data->start_time, timestamp()), philo->id);
@@ -98,7 +75,7 @@ void *philo_routine(void *arg)
 		printf("%lld %i picked left fork\n",  time_diff(philo->data->start_time, timestamp()), philo->id);
 		pthread_mutex_lock(philo->right);
 		printf("%lld %i picked right fork\n",  time_diff(philo->data->start_time, timestamp()), philo->id);
-		printf("%lld %i is eating\n",  time_diff(philo->data->start_time, timestamp()), philo->id); // this could maybe go after the mutexes
+		printf("%lld %i is eating\n",  time_diff(philo->data->start_time, timestamp()), philo->id);
 		pthread_mutex_lock(&philo->last_meal_mutex);
 		philo->last_meal = timestamp();
 		philo->meals_eaten++;
@@ -113,13 +90,12 @@ void *philo_routine(void *arg)
 	}
 	return (NULL);
 }
-void *monitor_routine(void *arg)
+void	*monitor_routine(void *arg)
 {
-	data_t	*data;
+	t_data	*data;
 	int		i;
 
-	data = (data_t *) arg;
-	data->philos_created = 1;
+	data = (t_data *) arg;
 	while (1)
 	{
 		i = 0;
@@ -129,7 +105,7 @@ void *monitor_routine(void *arg)
 			if ((timestamp() - data->philo[i].last_meal > (long long)data->time_to_die))
 			{ 
 				pthread_mutex_lock(&data->death_lock);
-				printf("%lld %i died and hadnt eaten for %lld\n", time_diff(data->start_time, timestamp()), data->philo[i].id, timestamp() - data->philo[i].last_meal);
+				printf("%lld %i died\n", time_diff(data->start_time, timestamp()), data->philo[i].id);
 				data->someone_died  = 1;
 				pthread_mutex_unlock(&data->death_lock);
 				pthread_mutex_unlock(&data->philo[i].last_meal_mutex);
@@ -142,16 +118,18 @@ void *monitor_routine(void *arg)
 	}
 	return (NULL);
 }
-void create_threads(data_t *data)
+
+void	create_threads(t_data *data)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	if (pthread_create(&data->monitor_thread, NULL, monitor_routine, data) != 0)
 		exit_error("failed at creating monitor thread");
 	while (i < data->num_philo)
 	{
-		if (pthread_create(&data->philo[i].thread_id, NULL, philo_routine, &data->philo[i]) != 0)
+		if (pthread_create(&data->philo[i].thread_id, NULL,
+				philo_routine, &data->philo[i]) != 0)
 			exit_error("failed to create philo thread");
 		i++;
 	}

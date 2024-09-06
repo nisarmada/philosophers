@@ -6,7 +6,7 @@
 /*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/06 14:25:36 by nsarmada      #+#    #+#                 */
-/*   Updated: 2024/09/03 18:20:04 by nikos         ########   odam.nl         */
+/*   Updated: 2024/09/04 14:51:56 by nikos         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,14 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-typedef struct philo_s philo_t;
-typedef struct data_s data_t;
+typedef struct s_philo t_philo;
+typedef struct s_data t_data;
 
-typedef struct data_s{
+typedef struct s_data{
 	uint64_t		time_to_die;
 	uint64_t		time_to_eat;
 	uint64_t		time_to_sleep;
-	philo_t			*philo;
+	t_philo			*philo;
 	pthread_mutex_t	*forks;
 	int				num_meals;
 	int				num_philo;
@@ -39,10 +39,10 @@ typedef struct data_s{
 	pthread_t		monitor_thread;
 	int				philos_created;
 	pthread_mutex_t	start_mutex;
-} data_t;
+} t_data;
 
-typedef struct philo_s{
-	data_t			*data;
+typedef struct s_philo{
+	t_data			*data;
 	pthread_mutex_t	*left;
 	pthread_mutex_t	*right;
 	pthread_mutex_t	last_meal_mutex;
@@ -50,23 +50,24 @@ typedef struct philo_s{
 	int				id;
 	long long		last_meal;
 	int				meals_eaten;
-} philo_t;
+} t_philo;
 
 int			is_digit(char c);
 int			input_check(char *av);
 void		print_array(int *array);
-void		init_stuff(data_t *data, int *array, int ac);
+void		init_stuff(t_data *data, int *array, int ac);
 int			*turn_to_int(char **av);
 int			ft_atoi(const char *nptr);
-void		init_philos(data_t *data);
-void		create_threads(data_t *data);
+void		init_philos(t_data *data);
+void		create_threads(t_data *data);
 long long	timestamp(void);
 long long	time_diff(long long start, long long end);
 void		exit_error(char *message);
 void		*monitor_routine(void *arg);
 void		ft_usleep(long long millisecs);
-int			everyone_ate(data_t *data);
-void		init_mutex(data_t *data);
-void		cleanup_crew(data_t *data, int *array);
-void pre_philo_routine(philo_t *philo);
+int			everyone_ate(t_data *data);
+void		init_mutex(t_data *data);
+void		cleanup_crew(t_data *data, int *array);
+void		pre_philo_routine(t_philo *philo);
+void 		philo_eating(t_philo *philo);
 #endif

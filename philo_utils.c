@@ -48,7 +48,6 @@ int *turn_to_int(char **av)
         array[i] = ft_atoi(av[i + 1]);
         i++;
     }
-   // print_array(array);
     return (array);
 }
 void print_array(int *array)

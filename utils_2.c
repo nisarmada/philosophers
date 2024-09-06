@@ -6,13 +6,13 @@
 /*   By: nikos <nikos@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/28 09:42:38 by nikos         #+#    #+#                 */
-/*   Updated: 2024/09/03 18:21:05 by nikos         ########   odam.nl         */
+/*   Updated: 2024/09/04 14:53:23 by nikos         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-long long timestamp(void)
+long long   timestamp(void)
 {
     struct timeval tv;
 
@@ -49,7 +49,7 @@ void ft_usleep(long long millisecs)
         usleep(500);
 }
 
-void init_mutex(data_t *data)
+void init_mutex(t_data *data)
 {
     if (pthread_mutex_init(&data->num_meals_mutex, NULL) != 0)
         exit_error("failed to create num_meals mutex");
@@ -58,28 +58,4 @@ void init_mutex(data_t *data)
     
 }
 
-int everyone_ate(data_t *data)
-{
-   int   all_fed;
-    int   i;
 
-    i = 0;
-    all_fed = 1;
-    while (i < data->num_philo)
-    {
-        pthread_mutex_lock(&data->philo[i].last_meal_mutex);
-        if (data->num_meals && data->philo[i].meals_eaten < data->num_meals)
-        {
-            all_fed = 0;
-        }
-        pthread_mutex_unlock(&data->philo[i].last_meal_mutex);
-        i++;
-    }
-    if (all_fed)
-    {
-        pthread_mutex_lock(&data->num_meals_mutex);
-        printf("each philo ate %i meals\n", data->num_meals);
-        pthread_mutex_unlock(&data->num_meals_mutex);
-    }
-    return (all_fed);
-}
