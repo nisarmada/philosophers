@@ -6,7 +6,7 @@
 /*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/06 14:25:43 by nsarmada      #+#    #+#                 */
-/*   Updated: 2024/09/06 15:32:41 by nsarmada      ########   odam.nl         */
+/*   Updated: 2024/09/07 19:23:16 by nikos         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void	*philo_routine(void *arg)
 			even_philo(philo);
 		else
 			odd_philo(philo);
-		if (check_death(philo->data))
+		if (check_death(philo->data) || philo->data->num_philo == 1)
 			return (NULL);
 		printf("%lld %i is sleeping\n",
 			time_diff(philo->data->start_time, timestamp()), philo->id);

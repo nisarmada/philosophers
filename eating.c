@@ -6,7 +6,7 @@
 /*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/09/05 17:38:54 by nsarmada      #+#    #+#                 */
-/*   Updated: 2024/09/06 15:33:19 by nsarmada      ########   odam.nl         */
+/*   Updated: 2024/09/07 19:22:00 by nikos         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,11 @@ int	pickup_forks(t_philo *philo, pthread_mutex_t *first,
 	}
 	printf("%lld %i has taken a fork\n",
 		time_diff(philo->data->start_time, timestamp()), philo->id);
+	if (philo->data->num_philo == 1)
+	{
+		pthread_mutex_unlock(first);
+		return (3);
+	}
 	pthread_mutex_lock(second);
 	if (check_death(data))
 	{
