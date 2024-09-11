@@ -6,7 +6,7 @@
 /*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/06 14:25:43 by nsarmada      #+#    #+#                 */
-/*   Updated: 2024/09/07 19:23:16 by nikos         ########   odam.nl         */
+/*   Updated: 2024/09/11 14:47:03 by nsarmada      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,8 +72,8 @@ void	*philo_routine(void *arg)
 	philo = (t_philo *) arg;
 	while (!check_death(philo->data))
 	{
-		printf("%lld %i is thinking\n",
-			time_diff(philo->data->start_time, timestamp()), philo->id);
+		safe_printf(philo->data, time_diff(philo->data->start_time,
+				timestamp()), philo->id, "is thinking");
 		if (check_death(philo->data))
 			return (NULL);
 		if (philo->id % 2 == 0)
@@ -82,8 +82,8 @@ void	*philo_routine(void *arg)
 			odd_philo(philo);
 		if (check_death(philo->data) || philo->data->num_philo == 1)
 			return (NULL);
-		printf("%lld %i is sleeping\n",
-			time_diff(philo->data->start_time, timestamp()), philo->id);
+		safe_printf(philo->data, time_diff(philo->data->start_time,
+				timestamp()), philo->id, "is sleeping");
 		ft_usleep(philo->data->time_to_sleep);
 		if (philo->data->num_meals && everyone_ate(philo->data))
 			return (NULL);

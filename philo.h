@@ -6,7 +6,7 @@
 /*   By: nsarmada <nsarmada@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/06 14:25:36 by nsarmada      #+#    #+#                 */
-/*   Updated: 2024/09/06 15:18:02 by nsarmada      ########   odam.nl         */
+/*   Updated: 2024/09/11 14:46:40 by nsarmada      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ typedef struct data_s
 	pthread_t		monitor_thread;
 	int				philos_created;
 	pthread_mutex_t	start_mutex;
+	pthread_mutex_t	printf_mutex;
 }	t_data;
 
 typedef struct philo_s
@@ -78,5 +79,6 @@ void		even_philo(t_philo *philo);
 void		odd_philo(t_philo *philo);
 void		handle_death(t_data *data, int i);
 int			check_death(t_data *data);
-
+int			safe_check(t_data *data);
+void		safe_printf(t_data *data, long long a, int i, char *str);
 #endif

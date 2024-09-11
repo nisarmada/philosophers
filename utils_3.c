@@ -6,7 +6,7 @@
 /*   By: nikos <nikos@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/31 13:24:50 by nikos         #+#    #+#                 */
-/*   Updated: 2024/09/06 15:20:01 by nsarmada      ########   odam.nl         */
+/*   Updated: 2024/09/11 14:47:35 by nsarmada      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ void	cleanup_crew(t_data *data, int *array)
 		i++;
 	}
 	pthread_mutex_destroy(&data->death_lock);
+	pthread_mutex_destroy(&data->printf_mutex);
 	free(data->forks);
 	free(data->philo);
 }
@@ -54,8 +55,8 @@ void	handle_death(t_data *data, int i)
 	pthread_mutex_lock(&data->death_lock);
 	if (!data->someone_died)
 	{
-		printf("%lld %i died\n",
-			time_diff(data->start_time, timestamp()), data->philo[i].id);
+		safe_printf(data, time_diff(data->start_time,
+				timestamp()), data->philo[i].id, "died");
 		data->someone_died = 1;
 	}
 	pthread_mutex_unlock(&data->death_lock);

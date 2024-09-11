@@ -6,7 +6,7 @@
 /*   By: nikos <nikos@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/28 09:42:38 by nikos         #+#    #+#                 */
-/*   Updated: 2024/09/06 15:31:21 by nsarmada      ########   odam.nl         */
+/*   Updated: 2024/09/11 14:10:08 by nsarmada      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,8 @@ int	init_mutex(t_data *data)
 	if (pthread_mutex_init(&data->start_mutex, NULL) != 0)
 		return (exit_error("start mutex initialization failed", 4));
 	if (pthread_mutex_init(&data->death_lock, NULL) != 0)
+		return (exit_error("death mutex failed", 4));
+	if (pthread_mutex_init(&data->printf_mutex, NULL) != 0)
 		return (exit_error("death mutex failed", 4));
 	return (0);
 }
